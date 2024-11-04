@@ -1,0 +1,41 @@
+name: Build macOS ARM  
+  
+on:  
+  push:  
+    branches:  
+      - main  # 你可以根据需要更改分支名称  
+  pull_request:  
+    branches:  
+      - main  # 你可以根据需要更改分支名称  
+  
+jobs:  
+  build:  
+    runs-on: macos-12  # 使用macOS 12 (Ventura)，支持ARM架构  
+  
+    steps:  
+    - name: Checkout code  
+      uses: actions/checkout@v2  
+  
+    - name: Set up Go  
+      uses: actions/setup-go@v2  
+      with:  
+        go-version: '1.18'  # 使用Go 1.18，根据需要更改版本  
+  
+    - name: Install Wails  
+      run: |  
+        curl -sfL https://install.goreleaser.com/github.com/wailsapp/wails/cmd/wails/latest/darwin-arm64.tar.gz | tar xz -C /tmp/  
+        sudo mv /tmp/wails /usr/local/bin  
+  
+    - name: Build project  
+      run: |  
+        export GOOS=darwin  
+        export GOARCH=arm64  
+        export CGO_ENABLED=1  
+        go mod tidy  
+        wails build -p your-project-name  # 替换为你的项目名称或路径  
+  
+    - name: Upload artifact  
+      uses: actions/upload-artifact@v2  
+      with:  
+        name: mac-arm-build  
+        path: ./output/  # 假设你的构建输出在./output/，根据实际情况调整
